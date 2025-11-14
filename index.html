@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat CAPTCHA - Are You Human?</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="captcha-container">
+        <!-- Header Section -->
+        <div class="captcha-header">
+            <h1>🤖 Cat CAPTCHA Verification</h1>
+            <p class="subtitle">Prove you're human by identifying the correct cat!</p>
+        </div>
+
+        <!-- Mode Toggle -->
+        <div class="mode-toggle">
+            <button id="defaultModeBtn" class="mode-btn active">🐱 Default Cats</button>
+            <button id="customModeBtn" class="mode-btn">✨ Custom Cats</button>
+        </div>
+
+        <!-- Custom Cat Builder (hidden by default) -->
+        <div id="customCatBuilder" class="custom-cat-builder hidden">
+            <div class="builder-header">
+                <h2>📸 Create Your Custom CAPTCHA</h2>
+                <p class="builder-subtitle" id="builderSubtitle">Add at least 2 cats with 3+ images each</p>
+                
+                <!-- Mixed Mode Toggle -->
+                <div class="mixed-mode-toggle">
+                    <label class="toggle-container">
+                        <input type="checkbox" id="mixedModeCheckbox" class="toggle-checkbox">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">
+                            🎨 Mix with default cats (only 1 custom cat needed)
+                        </span>
+                    </label>
+                    <p class="mixed-mode-hint">
+                        💡 Enable this to combine your custom cat(s) with Aiko, Pikachu, and Sesame. 
+                        Your custom cat will always be the target!
+                    </p>
+                </div>
+            </div>
+
+            <div id="catEntriesContainer" class="cat-entries-container">
+                <!-- Cat entries will be added dynamically -->
+            </div>
+
+            <div class="builder-actions">
+                <button id="addCatBtn" class="btn btn-add">+ Add Another Cat</button>
+                <button id="saveCustomCatsBtn" class="btn btn-primary">💾 Save & Play Custom CAPTCHA</button>
+                <button id="clearAllCatsBtn" class="btn btn-danger">🗑️ Clear All Custom Cats</button>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div id="gameArea" class="game-area">
+            <!-- Edit Button (shown in custom mode during gameplay) -->
+            <div id="editCustomCatsSection" class="edit-section hidden">
+                <button id="editCustomCatsBtn" class="btn btn-secondary-small">✏️ Edit Custom Cats</button>
+            </div>
+
+                <!-- Edit Button (shown in custom mode during gameplay) -->
+            <div id="editCustomCatsSection" class="edit-section hidden">
+                <button id="editCustomCatsBtn" class="btn btn-secondary-small">✏️ Edit Custom Cats</button>
+            </div>
+
+            <!-- Challenge Section -->
+            <div class="challenge-section">
+                <div class="challenge-instruction">
+                    <span class="instruction-text">Please select all images with</span>
+                    <div class="target-cat-info">
+                        <img id="profileImage" src="" alt="Target cat profile" class="profile-image">
+                        <span id="targetCatName" class="cat-name">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Grid -->
+            <div class="image-grid" id="imageGrid">
+                <!-- Images will be dynamically inserted here -->
+            </div>
+
+            <!-- Result Message -->
+            <div class="result-message" id="resultMessage"></div>
+
+            <!-- Action Buttons -->
+            <div class="button-container">
+                <button id="verifyButton" class="btn btn-primary">Verify</button>
+                <button id="newChallengeButton" class="btn btn-secondary">New Challenge</button>
+            </div>
+
+            <!-- Statistics (Optional) -->
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-label">Attempts:</span>
+                    <span id="attemptsCount" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Successes:</span>
+                    <span id="successCount" class="stat-value">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="notification-toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
