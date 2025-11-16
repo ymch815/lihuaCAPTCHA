@@ -472,6 +472,40 @@ body {
     font-size: 14px;
 }
 
+/* Storage Indicator */
+.storage-indicator {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.storage-label {
+    color: #856404;
+    font-weight: 600;
+}
+
+.storage-value {
+    color: #856404;
+    font-family: 'Courier New', monospace;
+}
+
+.storage-indicator.warning {
+    background: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.storage-indicator.warning .storage-label,
+.storage-indicator.warning .storage-value {
+    color: #721c24;
+}
+
 /* Mixed Mode Toggle */
 .mixed-mode-toggle {
     margin-top: 20px;

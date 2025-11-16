@@ -427,6 +427,62 @@ function readFileAsDataURL(file) {
 }
 
 /**
+ * Compress image to reduce memory usage
+ * This is especially important for mobile devices
+ */
+function compressImage(file, maxWidth = 600, maxHeight = 600, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            const img = new Image();
+            
+            img.onload = () => {
+                // Create canvas
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Calculate new dimensions while maintaining aspect ratio
+                let width = img.width;
+                let height = img.height;
+                
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+                
+                // Set canvas dimensions
+                canvas.width = width;
+                canvas.height = height;
+                
+                // Draw and compress
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Convert to base64 with compression
+                // Use JPEG for better compression, unless original is PNG with transparency
+                const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                const compressedDataURL = canvas.toDataURL(mimeType, quality);
+                
+                resolve(compressedDataURL);
+            };
+            
+            img.onerror = () => reject(new Error('Failed to load image'));
+            img.src = e.target.result;
+        };
+        
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+    });
+}
+
+/**
  * Add a new cat entry to the builder
  */
 function addCatEntry() {
@@ -562,7 +618,16 @@ async function processFiles(files, catId, type) {
         if (!validateImageFile(file)) continue;
         
         try {
-            const dataURL = await readFileAsDataURL(file);
+            // Show processing notification for mobile users
+            showNotification('info', `Processing ${file.name}...`);
+            
+            // Compress image to reduce memory usage
+            // Use different settings for profile vs regular images
+            const maxWidth = type === 'profile' ? 400 : 600;
+            const maxHeight = type === 'profile' ? 400 : 600;
+            const quality = 0.8;
+            
+            const dataURL = await compressImage(file, maxWidth, maxHeight, quality);
             
             if (type === 'profile') {
                 customCatsData[catId].profile = dataURL;
@@ -601,6 +666,38 @@ function updatePreviews(catId, type) {
             const preview = createPreviewElement(imageData, catId, type, index);
             previewContainer.appendChild(preview);
         });
+    }
+    
+    // Update storage indicator after preview update
+    updateStorageIndicator();
+}
+
+/**
+ * Update storage usage indicator
+ */
+function updateStorageIndicator() {
+    const storageIndicator = document.getElementById('storageIndicator');
+    const storageValue = document.getElementById('storageValue');
+    
+    if (!storageIndicator || !storageValue) return;
+    
+    try {
+        // Calculate current data size
+        const dataStr = JSON.stringify(customCatsData);
+        const sizeInMB = (dataStr.length / (1024 * 1024)).toFixed(2);
+        const maxSizeMB = 5; // Typical localStorage limit
+        
+        storageValue.textContent = `${sizeInMB} MB / ~${maxSizeMB} MB`;
+        
+        // Add warning if storage is getting full (>80%)
+        if (parseFloat(sizeInMB) > maxSizeMB * 0.8) {
+            storageIndicator.classList.add('warning');
+        } else {
+            storageIndicator.classList.remove('warning');
+        }
+        
+    } catch (error) {
+        console.error('Failed to calculate storage:', error);
     }
 }
 
@@ -768,7 +865,14 @@ function saveCustomCats() {
         
     } catch (error) {
         if (error.name === 'QuotaExceededError') {
-            showNotification('error', 'Storage limit exceeded. Please use fewer or smaller images.');
+            // Calculate approximate storage used
+            const dataStr = JSON.stringify(formattedCats);
+            const sizeInMB = (dataStr.length / (1024 * 1024)).toFixed(2);
+            
+            showNotification('error', 
+                `❌ Memory exceeded! Your images use ~${sizeInMB}MB. ` +
+                `Try: 1) Use fewer images per cat, 2) Upload smaller images, or 3) Use mixed mode with just 1 custom cat.`
+            );
         } else {
             showNotification('error', 'Failed to save custom cats: ' + error.message);
         }
@@ -827,6 +931,9 @@ function clearAllCustomCats() {
         localStorage.removeItem('lihuaCaptcha_customCats');
         
         showNotification('info', 'All custom cats cleared');
+        
+        // Update storage indicator
+        updateStorageIndicator();
     }
 }
 
@@ -905,6 +1012,7 @@ function switchToCustomMode() {
     
     // Populate builder with loaded cats if any
     populateBuilder();
+    updateStorageIndicator();
 }
 
 /**
@@ -960,6 +1068,7 @@ function showCustomCatBuilder() {
     customCatBuilder.classList.remove('hidden');
     gameArea.classList.add('hidden');
     populateBuilder();
+    updateStorageIndicator();
 }
 
 /**
